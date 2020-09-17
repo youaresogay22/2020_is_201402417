@@ -10,6 +10,8 @@ def encrypt_des(message: str, key: str, mode: int, iv=None) -> (bytes, bytes):
     :param iv:
     :return:
     """
+    if 
+    asd qwe
     asd
     pass
 
