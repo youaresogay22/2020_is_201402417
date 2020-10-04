@@ -6,10 +6,12 @@ import time
 def send(sock, send_data):
     """
     함수설명:
-
-    :param sock:
-    :param send_data:
-    :return:
+    TCP 소켓 통신 서버의 send 함수
+    무한반복문 내에서 쓰레드로 동작하며 connect된 소켓의 주소로
+    전송받은 데이터를 그대로 전송하는 함수
+    :param sock: 파이썬 서버 소켓 객체(TCP,IPv4)
+    :param send_data: 전송받은 데이터
+    :return: 없음
     """
     sock.send(send_data)
 
@@ -17,11 +19,15 @@ def send(sock, send_data):
 def receive(sock, addr, dst):
     """
     함수설명:
-
-    :param sock:
-    :param addr:
-    :param dst:
-    :return:
+    TCP 소켓 통신 서버의 receive 함수
+    무한반복문 내에서 쓰레드로 동작하며 connect된 소켓에서
+    전송받은 데이터를 자기 프로세스에 출력한 후에
+    다른 클라이언트로 전송하는 함수
+    
+    :param sock: 파이썬 서버 소켓 객체(TCP,IPv4)
+    :param addr: 접속된 클라이언트의 ip 주소
+    :param dst: 다른 클라이언트의 소켓 객체
+    :return: 없음
     """
     while True:
         recv_data = sock.recv(1024)
