@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Dict, List
 
 from Crypto.Cipher import AES, PKCS1_OAEP
@@ -39,8 +38,8 @@ class Proxy:
         self._linked_ip: Dict[str, "Client"] = {}
         self.msg_list: List[str] = []
 
-    def link(self, server: "Client"):
-        self._linked_ip[server.ip] = server
+    def link(self, client: "Client"):
+        self._linked_ip[client.ip] = client
 
     def public_key(self, target_ip: str):
         """
@@ -57,6 +56,14 @@ class Proxy:
             print("Can't read Data in proxy")
 
         self._linked_ip[target_ip].receive(msg, source_ip)
+
+    def client(self, ip: str) -> "Client":
+        """
+        상대 client를 ip값과 proxy를 통해 얻을 수 있음
+        :param ip:
+        :return:
+        """
+        return self._linked_ip[ip]
 
 
 class Client:
