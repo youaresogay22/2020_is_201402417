@@ -44,8 +44,8 @@ class Proxy:
     def public_key(self, target_ip: str):
         """
         Public key는 올바르게 전송해줌을 가정합니다.
-        :param target_ip:
-        :return:
+        :param target_ip: 클라이언트 객체 ip주소
+        :return: 매개변수로 받은 ip주소에 해당하는 클라이언트 객체의 공개키
         """
         return self._linked_ip[target_ip].key.publickey()
 
@@ -60,8 +60,8 @@ class Proxy:
     def client(self, ip: str) -> "Client":
         """
         상대 client를 ip값과 proxy를 통해 얻을 수 있음
-        :param ip:
-        :return:
+        :param ip: 얻을 클라이언트 객체 ip주소
+        :return: 매개변수로 받은 ip주소에 해당하는 클라이언트 객체
         """
         return self._linked_ip[ip]
 
@@ -79,14 +79,15 @@ class Client:
     def request(self, proxy: Proxy, target_ip: str, msg: str):
         """
         TODO 함수 설명:
-        :param proxy:
-        :param target_ip:
-        :param msg:
-        :return:
+        :param proxy: 프록시 서버로 클라이언트 객체를 연결하며 실습자료 ppt에서 공개키 저장소 역할을 수행
+                      handshake 함수 내에서 다른 클라이언트 객체를 쉽게 불러올 수 있도록 매개변수로 전달
+        :param target_ip: 상대방 ip주소
+        :param msg: 송신할 평문
+        :return: 없음
         """
         if not self.session_key.get(target_ip):
             self.handshake(proxy, target_ip)
-
+        
         enc = encrypt(msg, self.session_key[target_ip])
         proxy.request(self.ip, target_ip, enc)
 
@@ -94,9 +95,9 @@ class Client:
         """
         TODO 함수설명:
         이전에 handshake 과정을 거쳐서 session key를 공유한 상황이어야 함
-        :param msg:
-        :param source_ip:
-        :return:
+        :param msg: 공개키 암호를 통해 암호화된 암호문
+        :param source_ip: 송신자 ip 주소
+        :return: 없음
         """
         dec = decrypt(msg, self.session_key[source_ip])
         self.msg_list.append(dec)
@@ -109,25 +110,36 @@ class Client:
 
         session key를 입력받았을 때는 암호화된 session_key를 받았음을 가정한다. test code 참고
         session key를 받지 않았을 경우 session key를 생성해 session key를 상대의 공개키로 암호화하여 handshake 진행
-        :param proxy:
-        :param target_ip:
-        :param session_key:
-        :return:
+        :param proxy: 프록시 서버로 클라이언트 객체를 연결하며 실습자료 ppt에서 공개키 저장소 역할을 수행, 
+                      다른 클라이언트 객체를 불러올 수 있게 해줌
+        :param target_ip: 연결된 다른 클라이언트 객체의 ip주소
+        :param session_key: 파라미터가 존재한다면, 나의 공개키를 통해 암호화된 세션키
+        :return: 없음
         """
         # TODO: mode에 따라 각각 구현
         # handshake를 하는 상대도 session key를 저장해야 함
         if session_key is None:
             session_key = get_random_bytes(16)
             # TODO
+            target_client = proxy.client(target_ip)
+            target_public = PKCS1_OAEP.new(proxy.public_key(target_ip))
+            enc = target_public.encrypt(session_key)
+            target_client.handshake(proxy, self.ip, enc)
+
         else:
             # TODO
-            pass
+            target_client = proxy.client(target_ip)
+            my_private = PKCS1_OAEP.new(self.key)
+            dec = my_private.decrypt(session_key)
+            self.session_key[target_ip] = dec
+            target_client.session_key[self.ip] = dec
 
 
 """
 RSA 라이브러리 활용을 위한 예제 코드
 구현 이후에는 아래 코드는 지워주시길 바랍니다.
 """
+'''
 if __name__ == '__main__':
     key = RSA.generate(2048)  # RSA Key
     pub = key.publickey()
@@ -136,3 +148,4 @@ if __name__ == '__main__':
     rsa_priv = PKCS1_OAEP.new(key)
     print(rsa_pub.encrypt(b'abc'))
     print(rsa_priv.decrypt(rsa_pub.encrypt(b'abc')))
+'''
