@@ -6,11 +6,14 @@ from Crypto.Signature import DSS
 
 
 def save(cert):
+    """
+    hw10: 가독성 향상을 위해 임의로 indent 옵션을 추가하였음.
+    """
     cert_path = join('week_10', 'cert.json')
     if abspath(curdir).endswith('week_10'):
         cert_path = 'cert.json'
     with open(cert_path, 'w') as f:
-        json.dump(cert, f)
+        json.dump(cert, f, indent=4)
 
 
 def load():
@@ -32,7 +35,18 @@ def sign():
     :return: None
     """
     # TODO:
+    json_file = load()
+    private_key = ECC.generate(curve='P-256')
+    public_key = private_key.public_key()
+    signer = DSS.new(private_key, 'fips-186-3')
 
+    hash_string = str(json_file['student_id'])+ json_file['is_success']+ str(json_file['week'])
+    hash_val = SHA256.new(hash_string.encode('utf-8'))
+    signature = signer.sign(hash_val)
+    json_file['sign'] = signature.hex()
+    json_file['public_key'] = public_key.export_key(format='PEM')
+
+    save(json_file)
 
 def verify() -> bool:
     """
@@ -47,10 +61,25 @@ def verify() -> bool:
     :return:
     """
     # TODO:
+    json_file = load()
+    public = ECC.import_key(json_file['public_key'])
+    verifier = DSS.new(public, 'fips-186-3')
 
+    hash_string = str(json_file['student_id'])+ json_file['is_success']+ str(json_file['week'])
+    hash_val = SHA256.new(hash_string.encode('utf-8'))
+    
+    try:
+        verifier = DSS.new(public, 'fips-186-3')
+        verifier.verify(hash_val, bytes.fromhex(json_file['sign']))
+        return True
+    except:
+        return False
 
 if __name__ == '__main__':
-    pass
+    """
+    테스트 방법: cert.py 실행
+    이후 pytest 실행
+    """
     sign()
     # a = load()
     # print(a)
