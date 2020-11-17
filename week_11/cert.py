@@ -40,6 +40,20 @@ class Issuer:
         :return: cert_chain:
          [ { issuer: pub_key0, public_key: pub_key1, sign: Signature0(Hash(pub_key1)) }, ... ]
         """
+        issuer_name = self.public_key()
+        my_pub_key = pub_key
+        my_cert_chain = self.cert_chain
+        new_cert_chain = []
+        signer = DSS.new(self.__secret, 'fips-186-3')
+
+        my_pubkey_hash = SHA256.new(my_pub_key)
+        my_pubkey_hash_sign = signer.sign(my_pubkey_hash)
+        my_cert = Cert(issuer= issuer_name, public= pub_key, sign=my_pubkey_hash_sign)
+
+        new_cert_chain.extend(my_cert_chain)
+        new_cert_chain.append(my_cert)
+
+        return new_cert_chain
 
 
 class Holder:
@@ -62,6 +76,11 @@ class Holder:
         :param nonce: 랜덤 값
         :return: cert_chain, sign(nonce)
         """
+        signer = DSS.new(self.__secret, 'fips-186-3')
+        nonce_hash = SHA256.new(nonce)
+        signature = signer.sign(nonce_hash)
+        
+        return self.cert, signature
 
 
 class Verifier:
@@ -78,9 +97,61 @@ class Verifier:
 
         cert chain 검증 결과 root ca로부터 연결된 신뢰 관계를 갖고 있을 경우 True 반환
 
-        :param cert_chain:
-        :param pub_key:
-        :param nonce:
-        :param sign:
-        :return:
+        :param cert_chain: holder의 cert chain
+        :param pub_key: holder 공개키
+        :param nonce: nonce(임의의 글자)
+        :param sign: holder 개인키로 암호화된 nonce
+        :return: ture or false
         """
+        if self.root == b'':
+            nonce_hash = SHA256.new(nonce)
+            my_pub_key = ECC.import_key(pub_key)
+            
+            try:
+                dss_verifier2 = DSS.new(my_pub_key, 'fips-186-3')
+                dss_verifier2.verify(nonce_hash, sign)
+                print('signature done_noca')
+                return True
+            except:
+                return False
+
+       
+        elif not cert_chain:
+            nonce_hash = SHA256.new(nonce)
+            root_pub_key = ECC.import_key(pub_key)
+            
+            try:
+                dss_verifier2 = DSS.new(root_pub_key, 'fips-186-3')
+                dss_verifier2.verify(nonce_hash, sign)
+                print('signature done_rootca')
+                return True
+
+            except:
+                return False
+
+        #cert chain 검증
+        else:
+            for cert_element in cert_chain:
+                public_key_hash = SHA256.new(cert_element.public)
+                nonce_hash = SHA256.new(nonce)
+                issuer_pub_key = ECC.import_key(cert_element.issuer)
+                holder_pub_key = ECC.import_key(pub_key)
+
+                try:
+                    dss_verifier = DSS.new(issuer_pub_key, 'fips-186-3')
+                    dss_verifier.verify(public_key_hash, cert_element.sign)
+                    print('cert_chain done')
+
+                    try:
+                        dss_verifier2 = DSS.new(holder_pub_key, 'fips-186-3')
+                        dss_verifier2.verify(nonce_hash, sign)
+                        print('signature done')
+                        return True
+
+                    except:
+                        return False
+
+                except:
+                        return False
+
+            
