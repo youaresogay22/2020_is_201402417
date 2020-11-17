@@ -36,8 +36,10 @@ class Issuer:
         자신의 certificate chain 과
         issuer의 public key, holder의 public key와 public key의 Hash에 대한 서명을 가진 dictionary 반환
 
-        :param pub_key:
-        :return: cert_chain:
+        issuer가 holder에게 인증서를 발급하는 과정
+
+        :param pub_key: holder의 공개키
+        :return: cert_chain: holder의 cert chain
          [ { issuer: pub_key0, public_key: pub_key1, sign: Signature0(Hash(pub_key1)) }, ... ]
         """
         issuer_name = self.public_key()
@@ -72,7 +74,7 @@ class Holder:
         """
         TODO:
 
-        자신이 발급받아온 cert chain을 통해
+        자신이 발급받아온 cert chain을 통해 서명을 증명하는 함수
         :param nonce: 랜덤 값
         :return: cert_chain, sign(nonce)
         """
