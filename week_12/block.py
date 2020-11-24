@@ -76,10 +76,36 @@ class MerkleTree:
         """
         TODO: merkle tree를 만드는 함수
         최종 반환 시에는 Merkle root를 반환함
-        :param merkle_nodes:
-        :return:
+        :param merkle_nodes: tree 제작 시 사용할 merkle nodes
+        :return: merkle root
         """
+        tree = []
+        
+        while len(merkle_nodes)!=1:
+            print('aaa')
+            temp = []
+            for i in range(0, len(merkle_nodes) ,2):
+                print('bbb')
+                node_left = merkle_nodes[i]
 
+                if i+ 1 < len(merkle_nodes):
+                    node_right = merkle_nodes[i+1]
+                else:
+                    temp.append(merkle_nodes[i])
+                    break
+
+                LR_hash = node_left.hash + node_right.hash
+                print(LR_hash)
+                node_parent = MerkleNode(None,None, LR_hash)
+                node_parent.left = node_left
+                node_parent.right = node_right
+
+                temp.append(node_parent)
+
+            tree = temp
+
+        return tree[0]
+        
     def merkle_root(self) -> bytes:
         return self.root.hash
 
