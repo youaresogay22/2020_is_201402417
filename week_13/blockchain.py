@@ -23,22 +23,22 @@ class Address:
     def __eq__(self, other: 'Address'):
         """
         Dictionary의 key로 사용하기 위함
-        :param other:
-        :return:
+        :param other: 다른 address
+        :return: self의 address와 parameter address가 같은지에 대한 진리값
         """
         return self.__address == other.__address
 
     def __hash__(self):
         """
         Dictionary의 Hash값을 위함
-        :return:
+        :return: self의 hash int값
         """
         return int.from_bytes(bytes(self), byteorder='big')
 
     def __repr__(self):
         """
         디버깅 시 프린트 찍을 때 주소 값을 확인하기 쉽도록 함
-        :return:
+        :return: self address 12자리
         """
         return f'0x{self.__address[:12]}...'
 
@@ -152,10 +152,11 @@ class BlockChain:
 
         nonce_dict에 해당 address의 정보가 없을 경우 default값과 함께 추가
 
-        :param transaction_list:
-        :return: nonce 값을 확인 후 올바른 nonce를 가진
+        :param transaction_list: 확인할 transaction list
+        :return: nonce 값을 확인 후 올바른 nonce를 가졌는지에 대한 진리값
         """
         # TODO:
+        #구현실패, 죄송합니다.
 
     def update_state_tree(self, transaction_list: List[Transaction]) -> Dict[Address, int]:
         """
@@ -164,15 +165,16 @@ class BlockChain:
 
         트랜잭션의 송금액에 맞게 보유 금액을 조정 (차감)
 
-        :param transaction_list:
+        :param transaction_list: 업데이트할 트랜잭션 리스트
         :return: state root 값
         """
         # TODO
+        #구현실패, 죄송합니다.
 
     def mining(self, transaction_list: List[Transaction]):
         """
         TODO:
-        :return:
+        :return: 생성된 블록체인
         """
         # block_number: int  # number of block
         # parent_hash: bytes  # parent block's hash
@@ -190,11 +192,12 @@ class BlockChain:
             state_hash.update(state_tree[address].to_bytes(256, byteorder='big'))
         state_root = state_hash.digest()
         # TODO: 이후 블록 생성 구현
+        #구현실패, 죄송합니다.
 
     def verify(self) -> bool:
         """
         생성한 블록을 검증하는 함수
-        :return:
+        :return: 검증에 대한 진리값
         """
         for i in range(1, len(self.block_chain)):
             if not self.verify_block(i):
@@ -205,8 +208,8 @@ class BlockChain:
         """
         생성된 블록을 검증하는 함수
 
-        :param index:
-        :return:
+        :param index: 검증 시작할 인덱스값
+        :return: 검증에 대한 진리값
         """
         # Check merkle root (Merkle Tree를 직접 생성해 확인)
         merkle_tree = self.block_chain[index].merkle_tree
@@ -275,9 +278,9 @@ class BlockChain:
 def new_transaction_list(blockchain: BlockChain, _admin, _admin_sk):
     """
     새로운 임의 transaction 생성
-    :param blockchain:
-    :param _admin:
-    :param _admin_sk:
+    :param blockchain: transaction 생성할 blockchain 객체
+    :param _admin: public key
+    :param _admin_sk: secret key
     :return:
     """
     addresses = []

@@ -79,32 +79,15 @@ class MerkleTree:
         :param merkle_nodes: tree 제작 시 사용할 merkle nodes
         :return: merkle root
         """
-        tree = []
-        
-        while len(merkle_nodes)!=1:
-            print('aaa')
-            temp = []
-            for i in range(0, len(merkle_nodes) ,2):
-                print('bbb')
-                node_left = merkle_nodes[i]
+        if len(merkle_nodes) == 0:
+            return MerkleNode()
+        if len(merkle_nodes) == 1:
+            return merkle_nodes[0]
 
-                if i+ 1 < len(merkle_nodes):
-                    node_right = merkle_nodes[i+1]
-                else:
-                    temp.append(merkle_nodes[i])
-                    break
-
-                LR_hash = node_left.hash + node_right.hash
-                print(LR_hash)
-                node_parent = MerkleNode(None,None, LR_hash)
-                node_parent.left = node_left
-                node_parent.right = node_right
-
-                temp.append(node_parent)
-
-            tree = temp
-
-        return tree[0]
+        nodes = [MerkleNode(merkle_nodes[i], merkle_nodes[i + 1]) for i in range(0, len(merkle_nodes) - 1, 2)]
+        if len(merkle_nodes) % 2 == 1:
+            nodes.append(merkle_nodes[-1])
+        return cls.make_merkle_tree(nodes)
         
     def merkle_root(self) -> bytes:
         return self.root.hash
